@@ -12,11 +12,11 @@ const normalizeUser = (user: UserDocument) => {
     email: user.email,
     username: user.username,
     id: user.id,
-    token,
+    token: `Bearer ${token}`,
   };
 };
 
-export const register = async (req: Request, res: Response, next: NextFunction) => {
+export const register = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
     const newUser = new UserModel({
       email: req.body.email,
@@ -28,35 +28,36 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
   } catch (err) {
     if (err instanceof Error.ValidationError) {
       const messages = Object.values(err.errors).map((err) => err.message);
-      res.status(422).json(messages);
+      return res.status(422).json(messages);
     }
     next(err);
   }
 };
 
-export const login = async (req: Request,res:Response,next:NextFunction) => {
+export const login = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
-    const user = await UserModel.findOne({email:req.body.email}).select("+password");
-    const errors = { emailOrPassword: "Incorrect email or password"}
-    if(!user){
-      res.status(422).json(errors)
+    const user = await UserModel.findOne({ email: req.body.email }).select("+password");
+    const errors = { emailOrPassword: "Incorrect email or password" };
+
+    if (!user) {
+      return res.status(422).json(errors);
     }
 
-    const isSamePassword = await user?.validatePassword(req.body.password);
+    const isSamePassword = await user.validatePassword(req.body.password);
 
-    if(!isSamePassword){
-      res.status(422).json(errors)
+    if (!isSamePassword) {
+      return res.status(422).json(errors);
     }
 
-    res.send(normalizeUser(user as any));
+    res.send(normalizeUser(user));
   } catch (err) {
     next(err);
   }
-}
+};
 
-export const currentUser = (req: ExpressRequestInterface, res: Response) => {
-  if(!req.user){
-    res.sendStatus(401)
+export const currentUser = (req: ExpressRequestInterface, res: Response): Promise<any> | Response<any, Record<string, any>> | undefined => {
+  if (!req.user) {
+    return res.sendStatus(401);
   }
-  res.send(normalizeUser(req.user as UserDocument))
-}
+  res.send(normalizeUser(req.user));
+};
