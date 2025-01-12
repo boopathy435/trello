@@ -32,6 +32,8 @@ app.post("/api/users/login", usersController.login);
 app.get("/api/user", authMiddleware, usersController.currentUser as any);
 app.get("/api/boards", authMiddleware, boardsController.getBoards as any);
 
+app.post("/api/boards", authMiddleware, boardsController.createBoard as any);
+
 io.on("connection", () => {
   console.log("connect");
 });
