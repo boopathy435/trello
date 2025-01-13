@@ -7,9 +7,9 @@ import mongoose from "mongoose";
 import { Server } from "socket.io";
 import { secret } from "./config";
 import * as boardsController from "./controllers/boards";
-import * as usersController from "./controllers/users";
 import * as columnsController from "./controllers/columns";
 import * as tasksController from "./controllers/tasks";
+import * as usersController from "./controllers/users";
 import authMiddleware from "./middlewares/auth";
 import User from "./models/user";
 import { Socket } from "./types/socket.interface";
@@ -82,6 +82,10 @@ io.use(async (socket: Socket, next) => {
 
   socket.on(SocketEventsEnum.tasksCreate, (data) => {
     tasksController.createTask(io, socket, data);
+  });
+
+  socket.on(SocketEventsEnum.boardsUpdate, (data) => {
+    boardsController.updateBoard(io, socket, data);
   });
 });
 
