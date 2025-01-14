@@ -69,3 +69,16 @@ export const updateBoard = async (io: Server, socket: Socket, data: { boardId: s
     socket.emit(SocketEventsEnum.boardsUpdateFailure, getErrorMessage(error));
   }
 };
+
+export const deleteBoard = async (io: Server, socket: Socket, data: { boardId: string }) => {
+  try {
+    if (!socket.user) {
+      socket.emit(SocketEventsEnum.boardsDeleteFailure, "User is not authorized");
+      return;
+    }
+    await BoardModel.deleteOne({ _id: data.boardId });
+    io.to(data.boardId).emit(SocketEventsEnum.boardsDeleteSuccess);
+  } catch (error) {
+    socket.emit(SocketEventsEnum.boardsDeleteFailure, getErrorMessage(error));
+  }
+};
